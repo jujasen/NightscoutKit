@@ -20,9 +20,12 @@ public struct LoopSettings {
     public let deviceToken: String?
     public let bundleIdentifier: String?
     public let dosingStrategy: String?
+    public let workoutTargetRange: ClosedRange<Double>?
+    /// Raw value of LoopKit's `ExponentialInsulinModelPreset` ("rapidActingAdult", "fiasp", …).
+    public let insulinModel: String?
 
     public init(dosingEnabled: Bool, overridePresets: [TemporaryScheduleOverride], scheduleOverride: TemporaryScheduleOverride?, minimumBGGuard: Double?, preMealTargetRange: ClosedRange<Double>?, maximumBasalRatePerHour: Double?, maximumBolus: Double?,
-                deviceToken: String?, bundleIdentifier: String?, dosingStrategy: String?) {
+                deviceToken: String?, bundleIdentifier: String?, dosingStrategy: String?, workoutTargetRange: ClosedRange<Double>? = nil, insulinModel: String? = nil) {
         self.dosingEnabled = dosingEnabled
         self.overridePresets = overridePresets
         self.scheduleOverride = scheduleOverride
@@ -33,6 +36,8 @@ public struct LoopSettings {
         self.deviceToken = deviceToken
         self.bundleIdentifier = bundleIdentifier
         self.dosingStrategy = dosingStrategy
+        self.workoutTargetRange = workoutTargetRange
+        self.insulinModel = insulinModel
     }
 
     public var dictionaryRepresentation: [String: Any] {
@@ -53,6 +58,11 @@ public struct LoopSettings {
         rval["maximumBolus"] = maximumBolus
         rval["deviceToken"] = deviceToken
         rval["dosingStrategy"] = dosingStrategy
+
+        if let workoutTargetRange = workoutTargetRange {
+            rval["workoutTargetRange"] = [workoutTargetRange.lowerBound, workoutTargetRange.upperBound]
+        }
+        rval["insulinModel"] = insulinModel
 
         if let bundleIdentifier = bundleIdentifier {
             rval["bundleIdentifier"] = bundleIdentifier
@@ -91,5 +101,12 @@ public struct LoopSettings {
         deviceToken = rawValue["deviceToken"] as? String
         bundleIdentifier = rawValue["bundleIdentifier"] as? String
         dosingStrategy = rawValue["dosingStrategy"] as? String
+
+        if let workoutTargetRangeRaw = rawValue["workoutTargetRange"] as? [Double], workoutTargetRangeRaw.count == 2 {
+            workoutTargetRange = ClosedRange(uncheckedBounds: (lower: workoutTargetRangeRaw[0], upper: workoutTargetRangeRaw[1]))
+        } else {
+            workoutTargetRange = nil
+        }
+        insulinModel = rawValue["insulinModel"] as? String
      }
 }
