@@ -23,9 +23,12 @@ public struct LoopSettings {
     public let workoutTargetRange: ClosedRange<Double>?
     /// Raw value of LoopKit's `ExponentialInsulinModelPreset` ("rapidActingAdult", "fiasp", …).
     public let insulinModel: String?
+    /// The app's own settings — partial application, algorithm experiments, the fat and protein
+    /// boost — written into loopSettings as is. Never replaces one of the keys above.
+    public let appSettings: [String: Any]?
 
     public init(dosingEnabled: Bool, overridePresets: [TemporaryScheduleOverride], scheduleOverride: TemporaryScheduleOverride?, minimumBGGuard: Double?, preMealTargetRange: ClosedRange<Double>?, maximumBasalRatePerHour: Double?, maximumBolus: Double?,
-                deviceToken: String?, bundleIdentifier: String?, dosingStrategy: String?, workoutTargetRange: ClosedRange<Double>? = nil, insulinModel: String? = nil) {
+                deviceToken: String?, bundleIdentifier: String?, dosingStrategy: String?, workoutTargetRange: ClosedRange<Double>? = nil, insulinModel: String? = nil, appSettings: [String: Any]? = nil) {
         self.dosingEnabled = dosingEnabled
         self.overridePresets = overridePresets
         self.scheduleOverride = scheduleOverride
@@ -38,6 +41,7 @@ public struct LoopSettings {
         self.dosingStrategy = dosingStrategy
         self.workoutTargetRange = workoutTargetRange
         self.insulinModel = insulinModel
+        self.appSettings = appSettings
     }
 
     public var dictionaryRepresentation: [String: Any] {
@@ -66,6 +70,12 @@ public struct LoopSettings {
 
         if let bundleIdentifier = bundleIdentifier {
             rval["bundleIdentifier"] = bundleIdentifier
+        }
+
+        appSettings?.forEach { key, value in
+            if rval[key] == nil {
+                rval[key] = value
+            }
         }
 
         return rval
@@ -108,5 +118,6 @@ public struct LoopSettings {
             workoutTargetRange = nil
         }
         insulinModel = rawValue["insulinModel"] as? String
+        appSettings = nil
      }
 }

@@ -35,4 +35,12 @@ final class NightscoutKitTests: XCTestCase {
     func testAPNSProductionEnvironmentOmittedWhenUnset() {
         XCTAssertNil(makeProfileSet(isAPNSProduction: nil).dictionaryRepresentation["isAPNSProduction"])
     }
+
+    func testAppSettingsAreWrittenIntoLoopSettingsWithoutReplacingKnownKeys() {
+        let settings = LoopSettings(dosingEnabled: true, overridePresets: [], scheduleOverride: nil, minimumBGGuard: nil, preMealTargetRange: nil, maximumBasalRatePerHour: nil, maximumBolus: 2.75, deviceToken: nil, bundleIdentifier: nil, dosingStrategy: "automaticBolus",
+                                    appSettings: ["bolusPartialApplicationFactor": 0.4, "maximumBolus": 10.0])
+        let raw = settings.dictionaryRepresentation
+        XCTAssertEqual(0.4, raw["bolusPartialApplicationFactor"] as? Double)
+        XCTAssertEqual(2.75, raw["maximumBolus"] as? Double)
+    }
 }
